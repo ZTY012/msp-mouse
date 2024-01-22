@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>msp-mouse client</title>
+    <script
+      src="https://cdn.socket.io/4.7.4/socket.io.min.js"
+      integrity="sha384-Gr6Lu2Ajx28mzwyVR8CFkULdCU7kMlZ9UthllibdOSo6qAiN+yXNHqtgdTvFXMT4"
+      crossorigin="anonymous"
+    ></script>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        width: 100vw;
+        height: 100vh;
+        background-image: #eee;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      #loading {
+        font-weight: normal;
+        font-size: 3rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 id="loading">Now Loading...</h1>
+    <script>
+      const url = "http://192.168.1.93:10073";
+      const socket = io(url, {
+        transports: ["websocket"],
+      });
+      const rw = window.innerWidth;
+      const rh = window.innerHeight;
+      // 竖屏模式
+      const rotate = rw < rh;
+      document.getElementById("loading").innerText = url;
+      socket.on("connect", () => {
+        document.getElementById("loading").remove();
+      });
+      window.addEventListener("mousemove", (ev) => {
+        ev.preventDefault();
+        socket.emit(
+          "move",
+          rotate ? ev.clientY : ev.clientX,
+          rotate ? rw - ev.clientX : ev.clientY,
+          rotate ? rh : rw,
+          rotate ? rw : rh
+        );
+      });
+      window.addEventListener("click", (ev) => {
+        ev.preventDefault();
+        socket.emit("click");
+      });
+      window.addEventListener("contextmenu", (ev) => {
+        ev.preventDefault();
+        socket.emit("menu");
+      });
+    </script>
+  </body>
+</html>
